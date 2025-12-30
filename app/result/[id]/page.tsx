@@ -15,14 +15,39 @@ export default function ResultPage() {
   const careerId = params.id as string;
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [currentScores, setCurrentScores] = useState<any>(null);
 
   const career = careers.find((c) => c.id === careerId);
 
   useEffect(() => {
     if (user && career) {
       checkFavorite();
+      loadLatestScores();
     }
   }, [user, career]);
+
+  const loadLatestScores = async () => {
+    if (!user) return;
+
+    try {
+      const { data } = await supabase
+        .from('quiz_results')
+        .select('scores')
+        .eq('user_id', user.id)
+        .eq('career_id', careerId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (data) {
+        setCurrentScores(data.scores);
+      }
+    } catch (error) {
+      // No scores found
+    }
+  };
 
   const checkFavorite = async () => {
     try {
@@ -105,6 +130,56 @@ export default function ResultPage() {
     } else {
       navigator.clipboard.writeText(url);
       alert('URLをコピーしました！');
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!user) {
+      alert('メールを送信するにはログインが必要です');
+      router.push('/login');
+      return;
+    }
+
+    setSendingEmail(true);
+    setEmailSent(false);
+
+    try {
+      const response = await fetch('/api/send-result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          careerId: career.id,
+          scores: currentScores,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmailSent(true);
+
+        // テストモードの場合、プレビューURLを表示
+        if (data.previewURL) {
+          const viewEmail = confirm(
+            'メールを送信しました（テストモード）\n\n送信されたメールをプレビューで確認しますか？'
+          );
+          if (viewEmail) {
+            window.open(data.previewURL, '_blank');
+          }
+        } else {
+          alert('診断結果をメールで送信しました！');
+        }
+      } else {
+        throw new Error(data.error || 'メール送信に失敗しました');
+      }
+    } catch (error) {
+      console.error('Email error:', error);
+      alert('メール送信に失敗しました: ' + (error as Error).message);
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -254,9 +329,22 @@ export default function ResultPage() {
 
         {/* アクションボタン */}
         <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-3">
+          <div className="grid md:grid-cols-3 gap-3">
             <button onClick={handleShare} className="btn-primary text-lg">
               🔗 結果をシェアする
+            </button>
+            <button
+              onClick={handleSendEmail}
+              disabled={sendingEmail}
+              className={`text-lg font-bold py-4 px-8 rounded-full transition-all duration-300 ${
+                emailSent
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : sendingEmail
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              {sendingEmail ? '📧 送信中...' : emailSent ? '✅ 送信完了' : '📧 メールで送信'}
             </button>
             <button
               onClick={toggleFavorite}
