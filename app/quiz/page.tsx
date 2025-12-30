@@ -8,9 +8,13 @@ import { Answer } from '@/lib/types';
 import { calculateResult } from '@/lib/quiz-logic';
 import ProgressBar from '@/components/ProgressBar';
 import QuestionCard from '@/components/QuestionCard';
+import { useAuth } from '@/lib/auth-context';
+import { createClient } from '@/lib/supabase/client';
 
 export default function QuizPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const supabase = createClient();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -22,7 +26,7 @@ export default function QuizPage() {
     setSelectedOption(optionId);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!selectedOption) return;
 
     const newAnswers = [
@@ -36,6 +40,21 @@ export default function QuizPage() {
 
     if (isLastQuestion) {
       const result = calculateResult(newAnswers);
+
+      // Save result to database if user is logged in
+      if (user) {
+        try {
+          await supabase.from('quiz_results').insert({
+            user_id: user.id,
+            career_id: result.careerId,
+            scores: result.scores,
+            answers: newAnswers,
+          });
+        } catch (error) {
+          console.error('Error saving quiz result:', error);
+        }
+      }
+
       router.push(`/result/${result.careerId}`);
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1);

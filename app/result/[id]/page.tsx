@@ -1,15 +1,79 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { careers } from '@/data/careers';
+import { useAuth } from '@/lib/auth-context';
+import { createClient } from '@/lib/supabase/client';
 
 export default function ResultPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const supabase = createClient();
   const careerId = params.id as string;
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteId, setFavoriteId] = useState<string | null>(null);
 
   const career = careers.find((c) => c.id === careerId);
+
+  useEffect(() => {
+    if (user && career) {
+      checkFavorite();
+    }
+  }, [user, career]);
+
+  const checkFavorite = async () => {
+    try {
+      const { data } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user!.id)
+        .eq('career_id', careerId)
+        .single();
+
+      if (data) {
+        setIsFavorite(true);
+        setFavoriteId(data.id);
+      }
+    } catch (error) {
+      // Not favorite
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      if (isFavorite && favoriteId) {
+        // Remove favorite
+        await supabase.from('favorites').delete().eq('id', favoriteId);
+        setIsFavorite(false);
+        setFavoriteId(null);
+      } else {
+        // Add favorite
+        const { data } = await supabase
+          .from('favorites')
+          .insert({
+            user_id: user.id,
+            career_id: careerId,
+          })
+          .select('id')
+          .single();
+
+        if (data) {
+          setIsFavorite(true);
+          setFavoriteId(data.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
   if (!career) {
     return (
@@ -190,9 +254,21 @@ export default function ResultPage() {
 
         {/* アクションボタン */}
         <div className="space-y-4">
-          <button onClick={handleShare} className="btn-primary w-full text-lg">
-            🔗 結果をシェアする
-          </button>
+          <div className="grid md:grid-cols-2 gap-3">
+            <button onClick={handleShare} className="btn-primary text-lg">
+              🔗 結果をシェアする
+            </button>
+            <button
+              onClick={toggleFavorite}
+              className={`text-lg font-bold py-4 px-8 rounded-full transition-all duration-300 ${
+                isFavorite
+                  ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {isFavorite ? '⭐ お気に入り済み' : '☆ お気に入りに追加'}
+            </button>
+          </div>
           <div className="grid md:grid-cols-3 gap-3">
             <Link href="/quiz" className="block">
               <button className="btn-secondary w-full">もう一度診断</button>
@@ -200,9 +276,15 @@ export default function ResultPage() {
             <Link href="/careers" className="block">
               <button className="btn-secondary w-full">全職業を見る</button>
             </Link>
-            <Link href="/" className="block">
-              <button className="btn-secondary w-full">トップへ</button>
-            </Link>
+            {user ? (
+              <Link href="/dashboard" className="block">
+                <button className="btn-secondary w-full">マイページ</button>
+              </Link>
+            ) : (
+              <Link href="/" className="block">
+                <button className="btn-secondary w-full">トップへ</button>
+              </Link>
+            )}
           </div>
         </div>
 

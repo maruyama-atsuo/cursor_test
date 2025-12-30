@@ -1,6 +1,11 @@
-import Link from 'next/link'
+'use client';
+
+import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Home() {
+  const { user, signOut } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* ヘッダーナビゲーション */}
@@ -11,11 +16,34 @@ export default function Home() {
               <div className="text-2xl">🎯</div>
               <h1 className="text-xl font-bold text-gray-900">AI Career Navigator</h1>
             </div>
-            <Link href="/careers">
-              <button className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                職業一覧
-              </button>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/careers">
+                <button className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  職業一覧
+                </button>
+              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard">
+                    <button className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                      マイページ
+                    </button>
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    ログアウト
+                  </button>
+                </>
+              ) : (
+                <Link href="/login">
+                  <button className="btn-primary text-sm py-2 px-6">
+                    ログイン
+                  </button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </nav>
