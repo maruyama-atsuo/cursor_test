@@ -195,5 +195,13 @@ MIT License
 
 ---
 
+## 🌐 本番環境
+
+**公開URL**: https://ai-career-navigator-swart.vercel.app
+
+このアプリケーションはVercelで公開されており、GitHubにプッシュすると自動的にデプロイされます。
+
+---
+
 **作成日**: 2025-12-30
 **バージョン**: 1.0.0
