@@ -1,73 +1,96 @@
-# AI Career Navigator
+# 🎯 AI Career Navigator
 
-MBTI形式の診断で、あなたに合ったAI関連職業を提案するWebアプリケーション
+MBTI形式の診断で、あなたに最適なAI関連職業を提案するWebアプリケーション
 
-## 🎯 プロジェクト概要
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38bdf8)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e)
+
+## ✨ プロジェクト概要
 
 このアプリケーションは、ユーザーの性格や志向性を10問の質問で診断し、16種類のAI関連職業の中から最適なキャリアを提案します。
 
 ### 主な特徴
 
-- **10問の診断**: 楽しく気軽に回答できる質問形式
-- **16種類のAI職業**: 研究者からクリエイターまで幅広い職業を用意
-- **MBTI形式の診断ロジック**: 4つの軸で性格を分析
-- **詳細な結果表示**: 職業の説明、必要スキル、キャリアパスを提示
-- **シェア機能**: 診断結果をSNSで共有可能
-- **レスポンシブデザイン**: モバイル・タブレット・デスクトップ対応
+- 🧠 **科学的診断**: MBTI理論に基づいた4軸診断システム
+- 💼 **16種類のAI職業**: 研究者からクリエイターまで幅広い職業を用意
+- 🎨 **モダンUI**: Google風のクリーンで洗練されたデザイン
+- 🔐 **ユーザー認証**: Email、Google、GitHub OAuth対応
+- 💾 **データ保存**: 診断結果の自動保存と履歴管理
+- ⭐ **お気に入り**: 気になる職業をブックマーク
+- 📊 **統計表示**: 診断回数や傾向を可視化
+- 📱 **レスポンシブ**: モバイル・タブレット・デスクトップ対応
 
-## 🚀 始め方
+## 🚀 クイックスタート
 
 ### 必要な環境
 
 - Node.js 18.0 以上
-- npm または yarn
+- Supabase アカウント（データベース機能を使う場合）
 
-### インストール
+### セットアップ
 
 ```bash
-# 依存関係のインストール
+# リポジトリをクローン
+git clone https://github.com/maruyama-atsuo/cursor_test.git
+cd cursor_test
+
+# 依存関係をインストール
 npm install
 
-# 開発サーバーの起動
+# 環境変数を設定
+cp .env.example .env.local
+# .env.local を編集してSupabase認証情報を追加
+
+# 開発サーバーを起動
 npm run dev
-
-# ブラウザで開く
-# http://localhost:3000
 ```
 
-### ビルド
+ブラウザで http://localhost:3000 を開く
 
-```bash
-# プロダクションビルド
-npm run build
+### 📚 詳細なセットアップ手順
 
-# プロダクションサーバーの起動
-npm start
-```
+**重要: データベース機能を使うには追加設定が必要です**
+
+1. **クイックスタート**: [QUICK_START.md](./QUICK_START.md) - 3分で始める！
+2. **完全ガイド**: [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) - 全機能を有効化
+3. **デプロイ手順**: [DEPLOYMENT.md](./DEPLOYMENT.md) - 本番環境へ
 
 ## 📁 プロジェクト構成
 
 ```
 ai-career-navigator/
 ├── app/                      # Next.js App Router
-│   ├── layout.tsx           # ルートレイアウト
+│   ├── layout.tsx           # ルートレイアウト（AuthProvider統合）
 │   ├── page.tsx             # トップページ
 │   ├── globals.css          # グローバルCSS
 │   ├── quiz/                # 診断ページ
-│   │   └── page.tsx
-│   ├── result/[id]/         # 結果ページ（動的ルート）
-│   │   └── page.tsx
-│   └── careers/             # 全職業一覧
-│       └── page.tsx
+│   ├── result/[id]/         # 結果表示（お気に入り機能）
+│   ├── careers/             # 全職業一覧
+│   ├── login/               # ログインページ
+│   ├── signup/              # サインアップページ
+│   ├── dashboard/           # ユーザーダッシュボード
+│   ├── history/             # 診断履歴
+│   └── auth/callback/       # OAuth コールバック
 ├── components/              # Reactコンポーネント
 │   ├── ProgressBar.tsx     # プログレスバー
 │   └── QuestionCard.tsx    # 質問カード
-├── data/                    # データファイル
-│   ├── questions.ts        # 診断質問データ
-│   └── careers.ts          # AI職業定義データ
+├── data/                    # 静的データ
+│   ├── careers.ts          # 16種類のAI職業データ
+│   └── questions.ts        # 10問の診断質問データ
 ├── lib/                     # ユーティリティ
 │   ├── types.ts            # TypeScript型定義
-│   └── quiz-logic.ts       # 診断ロジック
+│   ├── quiz-logic.ts       # 診断ロジック
+│   ├── auth-context.tsx    # 認証コンテキスト
+│   ├── database.types.ts   # Supabase型定義
+│   └── supabase/           # Supabaseクライアント
+│       ├── client.ts       # クライアント側
+│       └── server.ts       # サーバー側
+├── supabase/                # データベース
+│   ├── schema.sql          # DBスキーマ（RLS含む）
+│   └── README.md           # DB設定手順
+├── middleware.ts            # Next.js middleware（認証）
 └── public/                  # 静的ファイル
 ```
 
@@ -118,10 +141,19 @@ ai-career-navigator/
 
 ## 🛠 技術スタック
 
-- **フレームワーク**: Next.js 14 (App Router)
-- **言語**: TypeScript
-- **スタイリング**: Tailwind CSS
-- **ホスティング**: Vercel（推奨）
+### フロントエンド
+- **Next.js 14** - React フレームワーク（App Router）
+- **TypeScript** - 型安全性
+- **Tailwind CSS** - ユーティリティファーストCSS
+
+### バックエンド
+- **Supabase** - PostgreSQL データベース
+- **Supabase Auth** - 認証・認可（Email/Google/GitHub）
+- **Row Level Security (RLS)** - データセキュリティ
+
+### デプロイ
+- **Vercel** - ホスティング（自動デプロイ）
+- **GitHub** - バージョン管理
 
 ## 📝 カスタマイズ
 
@@ -173,17 +205,29 @@ colors: {
 
 ## 🚀 デプロイ
 
-### Vercelへのデプロイ（推奨）
+### Vercelへのデプロイ（自動）
 
-1. GitHubにプッシュ
-2. [Vercel](https://vercel.com)でインポート
-3. 自動デプロイ完了！
+GitHubにプッシュすると自動でデプロイされます！
 
-### その他のプラットフォーム
+```bash
+git add .
+git commit -m "Update application"
+git push origin main
+```
 
-- Netlify
-- Cloudflare Pages
-- AWS Amplify
+### 初回デプロイ時の設定
+
+1. **Supabase データベースのセットアップ**
+   - [DEPLOYMENT.md](./DEPLOYMENT.md) の手順に従ってSQLを実行
+
+2. **Vercel 環境変数の設定**
+   - Vercel Dashboard → Settings → Environment Variables
+   - `NEXT_PUBLIC_SUPABASE_URL` と `NEXT_PUBLIC_SUPABASE_ANON_KEY` を追加
+
+3. **再デプロイ**
+   - Deployments → Redeploy
+
+詳細は [DEPLOYMENT.md](./DEPLOYMENT.md) を参照
 
 ## 📄 ライセンス
 
@@ -195,13 +239,23 @@ MIT License
 
 ---
 
-## 🌐 本番環境
+## 🔗 リンク
 
-**公開URL**: https://ai-career-navigator-swart.vercel.app
+- **リポジトリ**: [GitHub](https://github.com/maruyama-atsuo/cursor_test)
+- **本番環境**: [Vercel](https://cursor-test.vercel.app)
+- **Supabase Dashboard**: [Supabase](https://supabase.com/dashboard/project/yqwirzwmtnrmwrkoelmg)
 
-このアプリケーションはVercelで公開されており、GitHubにプッシュすると自動的にデプロイされます。
+## 📚 ドキュメント
+
+- [QUICK_START.md](./QUICK_START.md) - クイックスタートガイド
+- [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) - セットアップチェックリスト
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - デプロイ手順
+- [supabase/README.md](./supabase/README.md) - データベース設定
 
 ---
 
+**バージョン**: 2.0.0 (Supabase統合版)
 **作成日**: 2025-12-30
-**バージョン**: 1.0.0
+**更新日**: 2025-12-30
+
+Made with ❤️ using [Claude Code](https://claude.com/claude-code)
