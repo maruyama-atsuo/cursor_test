@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { questions } from '@/data/questions';
 import { Answer } from '@/lib/types';
 import { calculateResult } from '@/lib/quiz-logic';
@@ -24,7 +25,6 @@ export default function QuizPage() {
   const handleNext = () => {
     if (!selectedOption) return;
 
-    // 回答を保存
     const newAnswers = [
       ...answers.filter((a) => a.questionId !== currentQuestion.id),
       {
@@ -35,12 +35,9 @@ export default function QuizPage() {
     setAnswers(newAnswers);
 
     if (isLastQuestion) {
-      // 診断結果を計算
       const result = calculateResult(newAnswers);
-      // 結果ページに遷移
       router.push(`/result/${result.careerId}`);
     } else {
-      // 次の質問へ
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedOption(null);
     }
@@ -49,7 +46,6 @@ export default function QuizPage() {
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
-      // 前の質問の回答を復元
       const previousAnswer = answers.find(
         (a) => a.questionId === questions[currentQuestionIndex - 1].id
       );
@@ -58,14 +54,34 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-8 md:py-12">
-      <div className="max-w-3xl mx-auto space-y-8">
-        {/* ヘッダー */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold gradient-text">
-            AI Career Navigator
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* ヘッダー */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/90">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="text-2xl">🎯</span>
+              <span className="text-lg font-bold text-gray-900">AI Career Navigator</span>
+            </Link>
+            <Link href="/">
+              <button className="text-gray-500 hover:text-gray-700 text-sm font-medium">
+                中止する
+              </button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* メインコンテンツ */}
+      <div className="max-w-3xl mx-auto px-4 py-12 space-y-8">
+        {/* タイトルセクション */}
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            AI職業診断
           </h1>
-          <p className="text-gray-300">あなたに合ったAI職業を診断</p>
+          <p className="text-gray-600">
+            あなたに最適なAIキャリアを見つけましょう
+          </p>
         </div>
 
         {/* プログレスバー */}
@@ -82,37 +98,34 @@ export default function QuizPage() {
         />
 
         {/* ナビゲーションボタン */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 pt-4">
           <button
             onClick={handleBack}
             disabled={currentQuestionIndex === 0}
             className={`btn-secondary flex-1 ${
               currentQuestionIndex === 0
-                ? 'opacity-50 cursor-not-allowed'
+                ? 'opacity-40 cursor-not-allowed'
                 : ''
             }`}
           >
-            戻る
+            ← 戻る
           </button>
           <button
             onClick={handleNext}
             disabled={!selectedOption}
             className={`btn-primary flex-1 ${
-              !selectedOption ? 'opacity-50 cursor-not-allowed' : ''
+              !selectedOption ? 'opacity-40 cursor-not-allowed' : ''
             }`}
           >
-            {isLastQuestion ? '結果を見る' : '次へ'}
+            {isLastQuestion ? '結果を見る →' : '次へ →'}
           </button>
         </div>
 
-        {/* キャンセルリンク */}
+        {/* ヒント */}
         <div className="text-center">
-          <button
-            onClick={() => router.push('/')}
-            className="text-gray-400 hover:text-gray-200 transition-colors text-sm"
-          >
-            診断を中止する
-          </button>
+          <p className="text-sm text-gray-500">
+            💡 直感で答えると、より正確な結果が得られます
+          </p>
         </div>
       </div>
     </div>

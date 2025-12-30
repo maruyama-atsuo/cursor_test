@@ -12,33 +12,33 @@ export default function QuestionCard({
   onSelect,
 }: QuestionCardProps) {
   return (
-    <div className="card-glass p-8 md:p-10 space-y-6">
-      <h2 className="text-xl md:text-2xl font-semibold text-white leading-relaxed">
+    <div className="card-elevated p-8 md:p-12 space-y-8">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-relaxed">
         {question.question}
       </h2>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {question.options.map((option) => (
           <button
             key={option.id}
             onClick={() => onSelect(option.id)}
-            className={`w-full text-left p-4 md:p-5 rounded-xl transition-all duration-300 border-2 ${
+            className={`w-full text-left p-5 md:p-6 rounded-2xl transition-all duration-300 border-2 ${
               selectedOption === option.id
-                ? 'bg-gradient-to-r from-purple-600/50 to-pink-600/50 border-purple-400 scale-[1.02]'
-                : 'bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/40'
+                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-500 shadow-lg scale-[1.02]'
+                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md hover:scale-[1.01]'
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div
-                className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                   selectedOption === option.id
-                    ? 'border-purple-400 bg-purple-500'
-                    : 'border-white/40'
+                    ? 'border-blue-600 bg-blue-600'
+                    : 'border-gray-300'
                 }`}
               >
                 {selectedOption === option.id && (
                   <svg
-                    className="w-5 h-5 text-white"
+                    className="w-4 h-4 text-white"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -50,7 +50,9 @@ export default function QuestionCard({
                   </svg>
                 )}
               </div>
-              <span className="flex-1 text-gray-100 font-medium">
+              <span className={`flex-1 font-medium text-base md:text-lg ${
+                selectedOption === option.id ? 'text-blue-900' : 'text-gray-700'
+              }`}>
                 {option.text}
               </span>
             </div>
